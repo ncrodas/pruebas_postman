@@ -1,3 +1,3 @@
 <?php
-echo json_encode(["message" => "Bienvenido al servicio de autenticación"]);
+echo json_encode(["message" => "Bienvenido al servicio de autenticacion"]);
 ?>
