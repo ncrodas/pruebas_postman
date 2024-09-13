@@ -28,27 +28,48 @@
     <h1>Lista de Pokémones</h1>
     <div class="pokemon-container">
         <?php
+         // Aumentar el tiempo máximo de ejecución
+         set_time_limit(300);
+        // Función para realizar una solicitud cURL y devolver el contenido
+        function fetch_url($url) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Tiempo máximo de espera en segundos
+            $response = curl_exec($ch);
+            if (curl_errno($ch)) {
+                echo 'Error: ' . curl_error($ch);
+                $response = false;
+            }
+            curl_close($ch);
+            return $response;
+        }
+
         // URL de la API de Pokémon
         $apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=350';
 
         // Obtener los datos de la API
-        $response = file_get_contents($apiUrl);
-        $pokemons = json_decode($response, true)['results'];
+        $response = fetch_url($apiUrl);
+        if ($response !== false) {
+            $pokemons = json_decode($response, true)['results'];
 
-        // Iterar sobre cada Pokémon y mostrar su tarjeta
-        foreach ($pokemons as $pokemon) {
-            // Obtener detalles de cada Pokémon
-            $pokemonDetails = file_get_contents($pokemon['url']);
-            $pokemonData = json_decode($pokemonDetails, true);
+            // Iterar sobre cada Pokémon y mostrar su tarjeta
+            foreach ($pokemons as $pokemon) {
+                // Obtener detalles de cada Pokémon
+                $pokemonDetails = fetch_url($pokemon['url']);
+                if ($pokemonDetails !== false) {
+                    $pokemonData = json_decode($pokemonDetails, true);
 
-            // Obtener la URL de la imagen
-            $imageUrl = $pokemonData['sprites']['front_default'];
-            $name = ucfirst($pokemon['name']);
+                    // Obtener la URL de la imagen
+                    $imageUrl = $pokemonData['sprites']['front_default'];
+                    $name = ucfirst($pokemon['name']);
 
-            echo "<div class='pokemon-card'>";
-            echo "<img src='{$imageUrl}' alt='{$name}'>";
-            echo "<h3>{$name}</h3>";
-            echo "</div>";
+                    echo "<div class='pokemon-card'>";
+                    echo "<img src='{$imageUrl}' alt='{$name}'>";
+                    echo "<h3>{$name}</h3>";
+                    echo "</div>";
+                }
+            }
         }
         ?>
     </div>
